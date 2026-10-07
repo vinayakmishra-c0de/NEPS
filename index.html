@@ -131,10 +131,15 @@ const inr=n=>'₹'+Number(n||0).toLocaleString('en-IN'), REQ=['name','mother','f
 /* ===== DATA LAYER — Firebase Auth + Firestore (config is in the <head> block) ===== */
 const FB=()=>Promise.race([window.FBready,new Promise((_,rej)=>setTimeout(()=>rej(new Error('Firebase could not load. Check your internet connection and firebaseConfig.')),15000))]);
 const _last=new Map(); /* last-synced JSON per student id, so only changed records are written */
-const API={
+const ADMIN_EMAIL = "avinashkshiv@gmail.com";
+   
+   const API={
   async currentUser(){ const F=await FB(); return F.auth.currentUser; },
   async login(email,pw){
     if(!/\S+@\S+\.\S+/.test(email)||pw.length<6) throw new Error('Enter a valid email and a password of 6+ characters.');
+     if(email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
+       throw new Error('Access Denied: Only the authorized administrator can sign in.');
+    } 
     const F=await FB();
     try{ const c=await F.signInWithEmailAndPassword(F.auth,email,pw); return {email:c.user.email}; }
     catch(e){ const bad=['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'];
